@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 
-export class FarmResponseDto {
+export class FarmDetailsDto {
     @ApiProperty()
     id!: string;
 
@@ -33,6 +33,15 @@ export class FarmResponseDto {
 
     @ApiProperty()
     status!: string;
+
+    @ApiProperty()
+    memberCount!: number;
+
+    @ApiProperty()
+    fieldCount!: number;
+
+    @ApiProperty()
+    totalArea!: number;
 
     @ApiProperty()
     createdAt!: Date;
