@@ -7,6 +7,8 @@ import compression from 'compression';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { SWAGGER_AUTH_NAME } from './common/constants/swagger.constant';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -33,7 +35,19 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
+
+      transformOptions: {
+        enableImplicitConversion: true
+      }
     }),
+  );
+
+  app.useGlobalFilters(
+    new HttpExceptionFilter(),
+  );
+
+  app.useGlobalInterceptors(
+    new ResponseInterceptor()
   );
 
   const swaggerConfig = new DocumentBuilder()
