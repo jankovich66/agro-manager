@@ -5,6 +5,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { AuthorizationModule } from './authorization/authorization.module';
+import { FarmModule } from './farm/farm.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { AuthorizationModule } from './authorization/authorization.module';
     PrismaModule,
     AuthModule,
     AuthorizationModule,
+    FarmModule,
   ],
   controllers: [AppController],
   providers: [AppService],
