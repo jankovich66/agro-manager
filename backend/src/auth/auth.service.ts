@@ -14,6 +14,7 @@ import { AuthenticatedUser } from 'src/common/types/authenticated-user.type';
 import { RefreshTokenPaylaod } from './types/refresh-payload.type';
 import { LoginResponseDto } from './responses/login-response.dto';
 import { LogoutDto } from './dto/logout.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -59,7 +60,7 @@ export class AuthService {
 
         const refreshToken = await this.generateRefreshToken(user.id);
 
-        await this.saveRefreshToken(user.id, refreshToken);
+        await this.saveRefreshToken(this.prisma, user.id, refreshToken);
 
         await this.prisma.user.update({
             where: {
@@ -104,7 +105,16 @@ export class AuthService {
 
         const newRefreshToken = await this.generateRefreshToken(user.id);
 
-        await this.saveRefreshToken(user.id, newRefreshToken);
+        await this.prisma.$transaction(async (tx) => {
+            await tx.refreshToken.delete({
+                where: {
+                    id: storedToken.id
+                }
+            });
+
+            await this.saveRefreshToken(tx, user.id, newRefreshToken);
+        })
+        //await this.saveRefreshToken(user.id, newRefreshToken);
 
         return {
             user: UserMapper.toResponse(user),
@@ -175,12 +185,12 @@ export class AuthService {
         return user;
     }
 
-    private async saveRefreshToken(userId: string, refreshToken: string, ipAddress?: string, userAgent?: string) {
+    private async saveRefreshToken(prisma: Prisma.TransactionClient, userId: string, refreshToken: string, ipAddress?: string, userAgent?: string) {
         const tokenHash = await bcrypt.hash(refreshToken, 12);
 
         const expiresAt = this.calculateRefreshExpiration();
 
-        await this.prisma.refreshToken.create({
+        await prisma.refreshToken.create({
             data: {
                 userId,
                 tokenHash,
