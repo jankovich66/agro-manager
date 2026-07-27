@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { SWAGGER_AUTH_NAME } from './common/constants/swagger.constant';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -39,6 +40,13 @@ async function bootstrap() {
     .setTitle('Farm Management API')
     .setDescription('API documentation for the Farm Management system')
     .setVersion('1.0')
+    .addBearerAuth({
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT'
+    },
+    SWAGGER_AUTH_NAME
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);

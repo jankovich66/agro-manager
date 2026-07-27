@@ -7,7 +7,10 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from 'src/common/types/authenticated-user.type';
 import { LogoutDto } from './dto/logout.dto';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { SWAGGER_AUTH_NAME } from 'src/common/constants/swagger.constant';
 
+@ApiTags('Authentication')
 @Controller({
     path: 'auth',
     version: '1',
@@ -17,11 +20,17 @@ export class AuthController {
         private readonly authService: AuthService,
     ) {}
 
+    @ApiOperation({
+        summary: 'Register new user'
+    })
     @Post('register')
     register(@Body() dto: RegisterDto) {
         return this.authService.register(dto);
     }
 
+    @ApiOperation({
+        summary: 'Login'
+    })
     @Post('login')
     login(@Body() dto: LoginDto) {
         return this.authService.login(dto);
@@ -32,12 +41,19 @@ export class AuthController {
         return this.authService.refresh(dto);
     }
 
+    @ApiBearerAuth(SWAGGER_AUTH_NAME)
+    @ApiOperation({
+        summary: 'Current user profile'
+    })
     @Get('profile')
     @UseGuards(JwtAuthGuard)
     profile(@CurrentUser() user: AuthenticatedUser) {
         return this.authService.profile(user);
     }
 
+    @ApiOperation({
+        summary: 'Logout'
+    })
     @Post('logout')
     async logout(@Body() dto: LogoutDto) {
         await this.authService.logout(dto);
@@ -47,6 +63,10 @@ export class AuthController {
         }
     }
 
+    @ApiBearerAuth(SWAGGER_AUTH_NAME)
+    @ApiOperation({
+        summary: 'Logout from all devices'
+    })
     @Post('logout-all')
     @UseGuards(JwtAuthGuard)
     async logoutAll(@CurrentUser() user: AuthenticatedUser) {
